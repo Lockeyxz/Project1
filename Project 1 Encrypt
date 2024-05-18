@@ -128,8 +128,3 @@ decrypt_loop:
 
   mov eax, 1
   int 0x80
-section .data
-  plain_text_label_end equ $
-  key_label_end equ $
-  encrypted_text_label_end equ $
-  decrypted_text_label_end equ $
