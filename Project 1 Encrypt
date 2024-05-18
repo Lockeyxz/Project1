@@ -1,0 +1,135 @@
+section .data
+  message db 'perfect', 0
+  key db 'tractor', 0
+  output_filename db 'output.txt', 0
+  xor_result db 7 dup(0)
+  decrypted_result db 7 dup(0)
+  plain_text_label db 'Plain text: ', 0
+  key_label db 'Key: ', 0
+  encrypted_text_label db 'Encrypted text: ', 0
+  decrypted_text_label db 'Decrypted text: ', 0
+  newline db 0xa, 0
+
+section .bss
+  fd_out resb 1
+
+section .text
+  global _start
+
+_start:
+  mov esi, message
+  mov edi, key
+  mov ecx, 7
+  mov ebx, xor_result
+xor_loop:
+  lodsb
+  xor al, [edi]
+  add al, 32
+  mov [ebx], al
+  inc ebx
+  inc edi
+  loop xor_loop
+
+  mov esi, xor_result
+  mov edi, key
+  mov ecx, 7
+  mov ebx, decrypted_result
+decrypt_loop:
+  lodsb
+  sub al, 32
+  xor al, [edi]
+  mov [ebx], al
+  inc ebx
+  inc edi
+  loop decrypt_loop
+
+  mov eax, 5
+  mov ebx, output_filename
+  mov ecx, 66
+  mov edx, 0777o
+  int 0x80
+  mov [fd_out], eax
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [plain_text_label]
+  mov edx, 12
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [message]
+  mov edx, 7
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [newline]
+  mov edx, 1
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [key_label]
+  mov edx, 5
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [key]
+  mov edx, 7
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [newline]
+  mov edx, 1
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [encrypted_text_label]
+  mov edx, 16
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [xor_result]
+  mov edx, 7
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [newline]
+  mov edx, 1
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [decrypted_text_label]
+  mov edx, 16
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [decrypted_result]
+  mov edx, 7
+  int 0x80
+
+  mov eax, 4
+  mov ebx, [fd_out]
+  lea ecx, [newline]
+  mov edx, 1
+  int 0x80
+
+  mov eax, 6
+  mov ebx, [fd_out]
+  int 0x80
+
+  mov eax, 1
+  int 0x80
+section .data
+  plain_text_label_end equ $
+  key_label_end equ $
+  encrypted_text_label_end equ $
+  decrypted_text_label_end equ $
